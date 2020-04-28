@@ -14,6 +14,12 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
     EVENT_HOMEASSISTANT_STOP,
+    SERVICE_CLOSE_COVER,
+    SERVICE_OPEN_COVER,
+    SERVICE_STOP_COVER,
+    SERVICE_TOGGLE,
+    SERVICE_TURN_OFF,
+    SERVICE_TURN_ON,
     STATE_ON,
 )
 from homeassistant.core import CoreState, callback
@@ -26,57 +32,39 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
 
-_LOGGER = logging.getLogger(__name__)
-
-ATTR_EVENT = "event"
-ATTR_STATE = "state"
-
-CONF_ALIASES = "aliases"
-CONF_GROUP_ALIASES = "group_aliases"
-CONF_GROUP = "group"
-CONF_NOGROUP_ALIASES = "nogroup_aliases"
-CONF_DEVICE_DEFAULTS = "device_defaults"
-CONF_DEVICE_ID = "device_id"
-CONF_DEVICES = "devices"
-CONF_AUTOMATIC_ADD = "automatic_add"
-CONF_FIRE_EVENT = "fire_event"
-CONF_IGNORE_DEVICES = "ignore_devices"
-CONF_RECONNECT_INTERVAL = "reconnect_interval"
-CONF_SIGNAL_REPETITIONS = "signal_repetitions"
-CONF_WAIT_FOR_ACK = "wait_for_ack"
-
-DATA_DEVICE_REGISTER = "rflink_device_register"
-DATA_ENTITY_LOOKUP = "rflink_entity_lookup"
-DATA_ENTITY_GROUP_LOOKUP = "rflink_entity_group_only_lookup"
-DEFAULT_RECONNECT_INTERVAL = 10
-DEFAULT_SIGNAL_REPETITIONS = 1
-CONNECTION_TIMEOUT = 10
-
-EVENT_BUTTON_PRESSED = "button_pressed"
-EVENT_KEY_COMMAND = "command"
-EVENT_KEY_ID = "id"
-EVENT_KEY_SENSOR = "sensor"
-EVENT_KEY_UNIT = "unit"
-
-RFLINK_GROUP_COMMANDS = ["allon", "alloff"]
-
-DOMAIN = "rflink"
-
-SERVICE_SEND_COMMAND = "send_command"
-
-SIGNAL_AVAILABILITY = "rflink_device_available"
-SIGNAL_HANDLE_EVENT = "rflink_handle_event_{}"
-
-TMP_ENTITY = "tmp.{}"
-
-DEVICE_DEFAULTS_SCHEMA = vol.Schema(
-    {
-        vol.Optional(CONF_FIRE_EVENT, default=False): cv.boolean,
-        vol.Optional(
-            CONF_SIGNAL_REPETITIONS, default=DEFAULT_SIGNAL_REPETITIONS
-        ): vol.Coerce(int),
-    }
+from .const import (
+    ATTR_STATE,
+    COMMAND_ALLOFF,
+    COMMAND_ALLON,
+    COMMAND_DOWN,
+    COMMAND_OFF,
+    COMMAND_ON,
+    COMMAND_STOP,
+    COMMAND_UP,
+    CONF_DEVICE_ID,
+    CONF_IGNORE_DEVICES,
+    CONF_RECONNECT_INTERVAL,
+    CONF_WAIT_FOR_ACK,
+    CONNECTION_TIMEOUT,
+    DATA_DEVICE_REGISTER,
+    DATA_ENTITY_GROUP_LOOKUP,
+    DATA_ENTITY_LOOKUP,
+    DEFAULT_RECONNECT_INTERVAL,
+    DEFAULT_SIGNAL_REPETITIONS,
+    DOMAIN,
+    EVENT_BUTTON_PRESSED,
+    EVENT_KEY_COMMAND,
+    EVENT_KEY_ID,
+    EVENT_KEY_SENSOR,
+    RFLINK_GROUP_COMMANDS,
+    SERVICE_DIM,
+    SERVICE_SEND_COMMAND,
+    SIGNAL_AVAILABILITY,
+    SIGNAL_HANDLE_EVENT,
+    TMP_ENTITY,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -460,36 +448,36 @@ class RflinkCommand(RflinkDevice):
         """Do bookkeeping for command, send it to rflink and update state."""
         self.cancel_queued_send_commands()
 
-        if command == "turn_on":
-            cmd = "on"
+        if command == SERVICE_TURN_ON:
+            cmd = COMMAND_ON
             self._state = True
 
-        elif command == "turn_off":
-            cmd = "off"
+        elif command == SERVICE_TURN_OFF:
+            cmd = COMMAND_OFF
             self._state = False
 
-        elif command == "dim":
+        elif command == SERVICE_DIM:
             # convert brightness to rflink dim level
             cmd = str(int(args[0] / 17))
             self._state = True
 
-        elif command == "toggle":
-            cmd = "on"
+        elif command == SERVICE_TOGGLE:
+            cmd = COMMAND_ON
             # if the state is unknown or false, it gets set as true
             # if the state is true, it gets set as false
             self._state = self._state in [None, False]
 
         # Cover options for RFlink
-        elif command == "close_cover":
-            cmd = "DOWN"
+        elif command == SERVICE_CLOSE_COVER:
+            cmd = COMMAND_DOWN
             self._state = False
 
-        elif command == "open_cover":
-            cmd = "UP"
+        elif command == SERVICE_OPEN_COVER:
+            cmd = COMMAND_UP
             self._state = True
 
-        elif command == "stop_cover":
-            cmd = "STOP"
+        elif command == SERVICE_STOP_COVER:
+            cmd = COMMAND_STOP
             self._state = True
 
         # Send initial command and queue repetitions.
@@ -550,16 +538,16 @@ class SwitchableRflinkDevice(RflinkCommand, RestoreEntity):
         """Adjust state if Rflink picks up a remote command for this device."""
         self.cancel_queued_send_commands()
 
-        command = event["command"]
-        if command in ["on", "allon"]:
+        command = event[EVENT_KEY_COMMAND]
+        if command in [COMMAND_ON, COMMAND_ALLON]:
             self._state = True
-        elif command in ["off", "alloff"]:
+        elif command in [COMMAND_OFF, COMMAND_ALLOFF]:
             self._state = False
 
     async def async_turn_on(self, **kwargs):
         """Turn the device on."""
-        await self._async_handle_command("turn_on")
+        await self._async_handle_command(SERVICE_TURN_ON)
 
     async def async_turn_off(self, **kwargs):
         """Turn the device off."""
-        await self._async_handle_command("turn_off")
+        await self._async_handle_command(SERVICE_TURN_OFF)

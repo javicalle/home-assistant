@@ -3,12 +3,29 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components.cover import PLATFORM_SCHEMA, CoverEntity
-from homeassistant.const import CONF_NAME, CONF_TYPE, STATE_OPEN
+from homeassistant.components.cover import (
+    PLATFORM_SCHEMA as COVER_PLATFORM_SCHEMA,
+    CoverEntity,
+)
+from homeassistant.const import (
+    CONF_NAME,
+    CONF_TYPE,
+    SERVICE_CLOSE_COVER,
+    SERVICE_OPEN_COVER,
+    SERVICE_STOP_COVER,
+    STATE_OPEN,
+)
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from . import (
+from . import RflinkCommand
+from .const import (  # noqa: F401 # pylint: disable=unused-import
+    COMMAND_ALLOFF,
+    COMMAND_ALLON,
+    COMMAND_DOWN,
+    COMMAND_OFF,
+    COMMAND_ON,
+    COMMAND_UP,
     CONF_ALIASES,
     CONF_DEVICE_DEFAULTS,
     CONF_DEVICES,
@@ -18,17 +35,15 @@ from . import (
     CONF_NOGROUP_ALIASES,
     CONF_SIGNAL_REPETITIONS,
     DEVICE_DEFAULTS_SCHEMA,
-    RflinkCommand,
+    EVENT_KEY_COMMAND,
+    PARALLEL_UPDATES,
+    TYPE_INVERTED,
+    TYPE_STANDARD,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-PARALLEL_UPDATES = 0
-
-TYPE_STANDARD = "standard"
-TYPE_INVERTED = "inverted"
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+PLATFORM_SCHEMA = COVER_PLATFORM_SCHEMA.extend(
     {
         vol.Optional(
             CONF_DEVICE_DEFAULTS, default=DEVICE_DEFAULTS_SCHEMA({})
@@ -127,10 +142,10 @@ class RflinkCover(RflinkCommand, CoverEntity, RestoreEntity):
         """Adjust state if Rflink picks up a remote command for this device."""
         self.cancel_queued_send_commands()
 
-        command = event["command"]
-        if command in ["on", "allon", "up"]:
+        command = event[EVENT_KEY_COMMAND]
+        if command in [COMMAND_ON, COMMAND_ALLON, COMMAND_UP]:
             self._state = True
-        elif command in ["off", "alloff", "down"]:
+        elif command in [COMMAND_OFF, COMMAND_ALLOFF, COMMAND_DOWN]:
             self._state = False
 
     @property
@@ -150,15 +165,15 @@ class RflinkCover(RflinkCommand, CoverEntity, RestoreEntity):
 
     async def async_close_cover(self, **kwargs):
         """Turn the device close."""
-        await self._async_handle_command("close_cover")
+        await self._async_handle_command(SERVICE_CLOSE_COVER)
 
     async def async_open_cover(self, **kwargs):
         """Turn the device open."""
-        await self._async_handle_command("open_cover")
+        await self._async_handle_command(SERVICE_OPEN_COVER)
 
     async def async_stop_cover(self, **kwargs):
         """Turn the device stop."""
-        await self._async_handle_command("stop_cover")
+        await self._async_handle_command(SERVICE_STOP_COVER)
 
 
 class InvertedRflinkCover(RflinkCover):
@@ -167,5 +182,5 @@ class InvertedRflinkCover(RflinkCover):
     async def _async_send_command(self, cmd, repetitions):
         """Will invert only the UP/DOWN commands."""
         _LOGGER.debug("Getting command: %s for Rflink device: %s", cmd, self._device_id)
-        cmd_inv = {"UP": "DOWN", "DOWN": "UP"}
+        cmd_inv = {COMMAND_UP: COMMAND_DOWN, COMMAND_DOWN: COMMAND_UP}
         await super()._async_send_command(cmd_inv.get(cmd, cmd), repetitions)

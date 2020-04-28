@@ -7,7 +7,8 @@ from homeassistant.components.switch import PLATFORM_SCHEMA, SwitchEntity
 from homeassistant.const import CONF_NAME
 import homeassistant.helpers.config_validation as cv
 
-from . import (
+from . import SwitchableRflinkDevice
+from .const import (  # noqa: F401 # pylint: disable=unused-import
     CONF_ALIASES,
     CONF_DEVICE_DEFAULTS,
     CONF_DEVICES,
@@ -17,12 +18,10 @@ from . import (
     CONF_NOGROUP_ALIASES,
     CONF_SIGNAL_REPETITIONS,
     DEVICE_DEFAULTS_SCHEMA,
-    SwitchableRflinkDevice,
+    PARALLEL_UPDATES,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-PARALLEL_UPDATES = 0
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {

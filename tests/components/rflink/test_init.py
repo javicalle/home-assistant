@@ -4,16 +4,17 @@ import pytest
 from voluptuous.error import MultipleInvalid
 
 from homeassistant.bootstrap import async_setup_component
-from homeassistant.components.rflink import (
+from homeassistant.components.rflink import RflinkCommand
+from homeassistant.components.rflink.const import (
     CONF_RECONNECT_INTERVAL,
     DATA_ENTITY_LOOKUP,
     EVENT_KEY_COMMAND,
     EVENT_KEY_SENSOR,
     SERVICE_SEND_COMMAND,
     TMP_ENTITY,
-    RflinkCommand,
 )
 from homeassistant.const import ATTR_ENTITY_ID, SERVICE_STOP_COVER, SERVICE_TURN_OFF
+from homeassistant.core import HomeAssistantError
 
 from tests.async_mock import Mock
 
@@ -140,7 +141,7 @@ async def test_cover_send_no_wait(hass, monkeypatch):
     )
     await hass.async_block_till_done()
     assert protocol.send_command.call_args_list[0][0][0] == "RTS_0100F2_0"
-    assert protocol.send_command.call_args_list[0][0][1] == "STOP"
+    assert protocol.send_command.call_args_list[0][0][1] == "stop"
 
 
 async def test_send_command(hass, monkeypatch):
@@ -336,8 +337,6 @@ async def test_race_condition(hass, monkeypatch):
 
 async def test_not_connected(hass, monkeypatch):
     """Test Error when sending commands to a disconnected device."""
-    import pytest
-    from homeassistant.core import HomeAssistantError
 
     test_device = RflinkCommand("DUMMY_DEVICE")
     RflinkCommand.set_rflink_protocol(None)

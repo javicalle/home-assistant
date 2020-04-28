@@ -9,10 +9,12 @@ from homeassistant.components.light import (
     SUPPORT_BRIGHTNESS,
     LightEntity,
 )
-from homeassistant.const import CONF_NAME, CONF_TYPE
+from homeassistant.const import CONF_NAME, CONF_TYPE, SERVICE_TOGGLE, SERVICE_TURN_ON
 import homeassistant.helpers.config_validation as cv
 
-from . import (
+from . import SwitchableRflinkDevice
+from .const import (  # noqa: F401 # pylint: disable=unused-import
+    COMMAND_ON,
     CONF_ALIASES,
     CONF_AUTOMATIC_ADD,
     CONF_DEVICE_DEFAULTS,
@@ -26,17 +28,15 @@ from . import (
     DEVICE_DEFAULTS_SCHEMA,
     EVENT_KEY_COMMAND,
     EVENT_KEY_ID,
-    SwitchableRflinkDevice,
+    PARALLEL_UPDATES,
+    SERVICE_DIM,
+    TYPE_DIMMABLE,
+    TYPE_HYBRID,
+    TYPE_SWITCHABLE,
+    TYPE_TOGGLE,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-PARALLEL_UPDATES = 0
-
-TYPE_DIMMABLE = "dimmable"
-TYPE_SWITCHABLE = "switchable"
-TYPE_HYBRID = "hybrid"
-TYPE_TOGGLE = "toggle"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -187,7 +187,7 @@ class DimmableRflinkLight(SwitchableRflinkDevice, LightEntity):
             self._brightness = int(kwargs[ATTR_BRIGHTNESS] / 17) * 17
 
         # Turn on light at the requested dim level
-        await self._async_handle_command("dim", self._brightness)
+        await self._async_handle_command(SERVICE_DIM, self._brightness)
 
     @property
     def brightness(self):
@@ -245,12 +245,12 @@ class HybridRflinkLight(SwitchableRflinkDevice, LightEntity):
 
         # if receiver supports dimming this will turn on the light
         # at the requested dim level
-        await self._async_handle_command("dim", self._brightness)
+        await self._async_handle_command(SERVICE_DIM, self._brightness)
 
         # if the receiving device does not support dimlevel this
         # will ensure it is turned on when full brightness is set
         if self._brightness == 255:
-            await self._async_handle_command("turn_on")
+            await self._async_handle_command(SERVICE_TURN_ON)
 
     @property
     def brightness(self):
@@ -280,25 +280,20 @@ class ToggleRflinkLight(SwitchableRflinkDevice, LightEntity):
     and if the light is off and 'on' gets sent, the light will turn on.
     """
 
-    @property
-    def entity_id(self):
-        """Return entity id."""
-        return f"light.{self.name}"
-
     def _handle_event(self, event):
         """Adjust state if Rflink picks up a remote command for this device."""
         self.cancel_queued_send_commands()
 
-        command = event["command"]
-        if command == "on":
+        command = event[EVENT_KEY_COMMAND]
+        if command == COMMAND_ON:
             # if the state is unknown or false, it gets set as true
             # if the state is true, it gets set as false
             self._state = self._state in [None, False]
 
     async def async_turn_on(self, **kwargs):
         """Turn the device on."""
-        await self._async_handle_command("toggle")
+        await self._async_handle_command(SERVICE_TOGGLE)
 
     async def async_turn_off(self, **kwargs):
         """Turn the device off."""
-        await self._async_handle_command("toggle")
+        await self._async_handle_command(SERVICE_TOGGLE)

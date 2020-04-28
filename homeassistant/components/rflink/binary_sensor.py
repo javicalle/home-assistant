@@ -5,21 +5,29 @@ import voluptuous as vol
 
 from homeassistant.components.binary_sensor import (
     DEVICE_CLASSES_SCHEMA,
-    PLATFORM_SCHEMA,
+    PLATFORM_SCHEMA as BINARY_SENSOR_PLATFORM_SCHEMA,
     BinarySensorEntity,
 )
 from homeassistant.const import CONF_DEVICE_CLASS, CONF_FORCE_UPDATE, CONF_NAME
 import homeassistant.helpers.config_validation as cv
 import homeassistant.helpers.event as evt
 
-from . import CONF_ALIASES, CONF_DEVICES, RflinkDevice
-
-CONF_OFF_DELAY = "off_delay"
-DEFAULT_FORCE_UPDATE = False
+from . import RflinkDevice
+from .const import (
+    COMMAND_ALLOFF,
+    COMMAND_ALLON,
+    COMMAND_OFF,
+    COMMAND_ON,
+    CONF_ALIASES,
+    CONF_DEVICES,
+    CONF_OFF_DELAY,
+    DEFAULT_FORCE_UPDATE,
+    EVENT_KEY_COMMAND,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+PLATFORM_SCHEMA = BINARY_SENSOR_PLATFORM_SCHEMA.extend(
     {
         vol.Optional(CONF_DEVICES, default={}): {
             cv.string: vol.Schema(
@@ -72,10 +80,10 @@ class RflinkBinarySensor(RflinkDevice, BinarySensorEntity):
 
     def _handle_event(self, event):
         """Domain specific event handler."""
-        command = event["command"]
-        if command in ["on", "allon"]:
+        command = event[EVENT_KEY_COMMAND]
+        if command in [COMMAND_ON, COMMAND_ALLON]:
             self._state = True
-        elif command in ["off", "alloff"]:
+        elif command in [COMMAND_OFF, COMMAND_ALLOFF]:
             self._state = False
 
         if self._state and self._off_delay is not None:

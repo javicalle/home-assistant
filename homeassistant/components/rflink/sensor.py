@@ -4,7 +4,7 @@ import logging
 from rflink.parser import PACKET_FIELDS, UNITS
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.components.sensor import PLATFORM_SCHEMA as SENSOR_PLATFORM_SCHEMA
 from homeassistant.const import (
     ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
@@ -13,32 +13,27 @@ from homeassistant.const import (
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from . import (
+from . import RflinkDevice
+from .const import (
     CONF_ALIASES,
     CONF_AUTOMATIC_ADD,
     CONF_DEVICES,
+    CONF_SENSOR_TYPE,
     DATA_DEVICE_REGISTER,
     DATA_ENTITY_LOOKUP,
     EVENT_KEY_ID,
     EVENT_KEY_SENSOR,
     EVENT_KEY_UNIT,
+    EVENT_KEY_VALUE,
+    SENSOR_ICONS,
     SIGNAL_AVAILABILITY,
     SIGNAL_HANDLE_EVENT,
     TMP_ENTITY,
-    RflinkDevice,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-SENSOR_ICONS = {
-    "humidity": "mdi:water-percent",
-    "battery": "mdi:battery",
-    "temperature": "mdi:thermometer",
-}
-
-CONF_SENSOR_TYPE = "sensor_type"
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+PLATFORM_SCHEMA = SENSOR_PLATFORM_SCHEMA.extend(
     {
         vol.Optional(CONF_AUTOMATIC_ADD, default=True): cv.boolean,
         vol.Optional(CONF_DEVICES, default={}): {
@@ -116,7 +111,7 @@ class RflinkSensor(RflinkDevice):
 
     def _handle_event(self, event):
         """Domain specific event handler."""
-        self._state = event["value"]
+        self._state = event[EVENT_KEY_VALUE]
 
     async def async_added_to_hass(self):
         """Register update callback."""

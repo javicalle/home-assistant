@@ -7,7 +7,7 @@ control of RFLink cover devices.
 
 import logging
 
-from homeassistant.components.rflink import EVENT_BUTTON_PRESSED
+from homeassistant.components.rflink.const import EVENT_BUTTON_PRESSED
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     SERVICE_CLOSE_COVER,
@@ -102,7 +102,7 @@ async def test_default_setup(hass, monkeypatch):
     await hass.async_block_till_done()
     assert hass.states.get(f"{DOMAIN}.test").state == STATE_CLOSED
     assert protocol.send_command_ack.call_args_list[0][0][0] == "protocol_0_0"
-    assert protocol.send_command_ack.call_args_list[0][0][1] == "DOWN"
+    assert protocol.send_command_ack.call_args_list[0][0][1] == "down"
 
     hass.async_create_task(
         hass.services.async_call(
@@ -111,7 +111,7 @@ async def test_default_setup(hass, monkeypatch):
     )
     await hass.async_block_till_done()
     assert hass.states.get(f"{DOMAIN}.test").state == STATE_OPEN
-    assert protocol.send_command_ack.call_args_list[1][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[1][0][1] == "up"
 
 
 async def test_firing_bus_event(hass, monkeypatch):
@@ -253,10 +253,10 @@ async def test_signal_repetitions_cancelling(hass, monkeypatch):
 
     await hass.async_block_till_done()
 
-    assert protocol.send_command_ack.call_args_list[0][0][1] == "DOWN"
-    assert protocol.send_command_ack.call_args_list[1][0][1] == "UP"
-    assert protocol.send_command_ack.call_args_list[2][0][1] == "UP"
-    assert protocol.send_command_ack.call_args_list[3][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[0][0][1] == "down"
+    assert protocol.send_command_ack.call_args_list[1][0][1] == "up"
+    assert protocol.send_command_ack.call_args_list[2][0][1] == "up"
+    assert protocol.send_command_ack.call_args_list[3][0][1] == "up"
 
 
 async def test_group_alias(hass, monkeypatch):
@@ -623,7 +623,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.nonkaku_type_standard").state == STATE_CLOSED
     assert protocol.send_command_ack.call_args_list[0][0][0] == "nonkaku_device_1"
-    assert protocol.send_command_ack.call_args_list[0][0][1] == "DOWN"
+    assert protocol.send_command_ack.call_args_list[0][0][1] == "down"
 
     # Sending the open command from HA should result
     # in an 'UP' command sent to a non-newkaku device
@@ -640,7 +640,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.nonkaku_type_standard").state == STATE_OPEN
     assert protocol.send_command_ack.call_args_list[1][0][0] == "nonkaku_device_1"
-    assert protocol.send_command_ack.call_args_list[1][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[1][0][1] == "up"
 
     # Sending the close command from HA should result
     # in an 'DOWN' command sent to a non-newkaku device
@@ -655,7 +655,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.nonkaku_type_none").state == STATE_CLOSED
     assert protocol.send_command_ack.call_args_list[2][0][0] == "nonkaku_device_2"
-    assert protocol.send_command_ack.call_args_list[2][0][1] == "DOWN"
+    assert protocol.send_command_ack.call_args_list[2][0][1] == "down"
 
     # Sending the open command from HA should result
     # in an 'UP' command sent to a non-newkaku device
@@ -670,7 +670,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.nonkaku_type_none").state == STATE_OPEN
     assert protocol.send_command_ack.call_args_list[3][0][0] == "nonkaku_device_2"
-    assert protocol.send_command_ack.call_args_list[3][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[3][0][1] == "up"
 
     # Sending the close command from HA should result
     # in an 'UP' command sent to a non-newkaku device
@@ -687,7 +687,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.nonkaku_type_inverted").state == STATE_CLOSED
     assert protocol.send_command_ack.call_args_list[4][0][0] == "nonkaku_device_3"
-    assert protocol.send_command_ack.call_args_list[4][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[4][0][1] == "up"
 
     # Sending the open command from HA should result
     # in an 'DOWN' command sent to a non-newkaku device
@@ -704,7 +704,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.nonkaku_type_inverted").state == STATE_OPEN
     assert protocol.send_command_ack.call_args_list[5][0][0] == "nonkaku_device_3"
-    assert protocol.send_command_ack.call_args_list[5][0][1] == "DOWN"
+    assert protocol.send_command_ack.call_args_list[5][0][1] == "down"
 
     # Sending the close command from HA should result
     # in an 'DOWN' command sent to a newkaku device
@@ -721,7 +721,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.newkaku_type_standard").state == STATE_CLOSED
     assert protocol.send_command_ack.call_args_list[6][0][0] == "newkaku_device_4"
-    assert protocol.send_command_ack.call_args_list[6][0][1] == "DOWN"
+    assert protocol.send_command_ack.call_args_list[6][0][1] == "down"
 
     # Sending the open command from HA should result
     # in an 'UP' command sent to a newkaku device
@@ -738,7 +738,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.newkaku_type_standard").state == STATE_OPEN
     assert protocol.send_command_ack.call_args_list[7][0][0] == "newkaku_device_4"
-    assert protocol.send_command_ack.call_args_list[7][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[7][0][1] == "up"
 
     # Sending the close command from HA should result
     # in an 'UP' command sent to a newkaku device
@@ -753,7 +753,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.newkaku_type_none").state == STATE_CLOSED
     assert protocol.send_command_ack.call_args_list[8][0][0] == "newkaku_device_5"
-    assert protocol.send_command_ack.call_args_list[8][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[8][0][1] == "up"
 
     # Sending the open command from HA should result
     # in an 'DOWN' command sent to a newkaku device
@@ -768,7 +768,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.newkaku_type_none").state == STATE_OPEN
     assert protocol.send_command_ack.call_args_list[9][0][0] == "newkaku_device_5"
-    assert protocol.send_command_ack.call_args_list[9][0][1] == "DOWN"
+    assert protocol.send_command_ack.call_args_list[9][0][1] == "down"
 
     # Sending the close command from HA should result
     # in an 'UP' command sent to a newkaku device
@@ -785,7 +785,7 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.newkaku_type_inverted").state == STATE_CLOSED
     assert protocol.send_command_ack.call_args_list[10][0][0] == "newkaku_device_6"
-    assert protocol.send_command_ack.call_args_list[10][0][1] == "UP"
+    assert protocol.send_command_ack.call_args_list[10][0][1] == "up"
 
     # Sending the open command from HA should result
     # in an 'DOWN' command sent to a newkaku device
@@ -802,4 +802,4 @@ async def test_inverted_cover(hass, monkeypatch):
 
     assert hass.states.get(f"{DOMAIN}.newkaku_type_inverted").state == STATE_OPEN
     assert protocol.send_command_ack.call_args_list[11][0][0] == "newkaku_device_6"
-    assert protocol.send_command_ack.call_args_list[11][0][1] == "DOWN"
+    assert protocol.send_command_ack.call_args_list[11][0][1] == "down"
