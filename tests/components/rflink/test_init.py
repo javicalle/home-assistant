@@ -337,7 +337,6 @@ async def test_race_condition(hass, monkeypatch):
 
 async def test_not_connected(hass, monkeypatch):
     """Test Error when sending commands to a disconnected device."""
-
     test_device = RflinkCommand("DUMMY_DEVICE")
     RflinkCommand.set_rflink_protocol(None)
     with pytest.raises(HomeAssistantError):
