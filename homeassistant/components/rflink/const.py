@@ -41,6 +41,7 @@ EVENT_KEY_ID = "id"
 EVENT_KEY_SENSOR = "sensor"
 EVENT_KEY_UNIT = "unit"
 EVENT_KEY_VALUE = "value"
+EVENT_KEY_VERSION = "version"
 
 # #### Sending COMMAND attributes ####
 COMMAND_PROTOCOL = "protocol"
@@ -53,9 +54,6 @@ COMMAND_OFF = "off"
 COMMAND_UP = "up"
 COMMAND_DOWN = "down"
 COMMAND_STOP = "stop"
-# COMMAND_UP = "UP"
-# COMMAND_DOWN = "DOWN"
-# COMMAND_STOP = "STOP"
 COMMAND_ALLON = "allon"
 COMMAND_ALLOFF = "alloff"
 
