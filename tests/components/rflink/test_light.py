@@ -5,7 +5,7 @@ control of RFLink switch devices.
 
 """
 from homeassistant.components.light import ATTR_BRIGHTNESS
-from homeassistant.components.rflink import EVENT_BUTTON_PRESSED
+from homeassistant.components.rflink.const import EVENT_BUTTON_PRESSED
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     SERVICE_TURN_OFF,

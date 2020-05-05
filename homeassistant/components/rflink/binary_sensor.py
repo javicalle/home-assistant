@@ -12,7 +12,8 @@ from homeassistant.const import CONF_DEVICE_CLASS, CONF_FORCE_UPDATE, CONF_NAME
 import homeassistant.helpers.config_validation as cv
 import homeassistant.helpers.event as evt
 
-from . import CONF_ALIASES, CONF_DEVICES, RflinkDevice
+from . import RflinkDevice
+from .const import CONF_ALIASES, CONF_DEVICES
 
 CONF_OFF_DELAY = "off_delay"
 DEFAULT_FORCE_UPDATE = False

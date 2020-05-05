@@ -13,7 +13,8 @@ from homeassistant.const import (
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from . import (
+from . import RflinkDevice
+from .const import (
     CONF_ALIASES,
     CONF_AUTOMATIC_ADD,
     CONF_DEVICES,
@@ -25,7 +26,6 @@ from . import (
     SIGNAL_AVAILABILITY,
     SIGNAL_HANDLE_EVENT,
     TMP_ENTITY,
-    RflinkDevice,
 )
 
 _LOGGER = logging.getLogger(__name__)

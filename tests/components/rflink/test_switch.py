@@ -5,7 +5,7 @@ control of Rflink switch devices.
 
 """
 
-from homeassistant.components.rflink import EVENT_BUTTON_PRESSED
+from homeassistant.components.rflink.const import EVENT_BUTTON_PRESSED
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     SERVICE_TURN_OFF,

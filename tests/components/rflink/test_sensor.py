@@ -5,7 +5,7 @@ automatic sensor creation.
 
 """
 
-from homeassistant.components.rflink import (
+from homeassistant.components.rflink.const import (
     CONF_RECONNECT_INTERVAL,
     DATA_ENTITY_LOOKUP,
     EVENT_KEY_COMMAND,

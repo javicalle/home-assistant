@@ -4,16 +4,17 @@ import pytest
 from voluptuous.error import MultipleInvalid
 
 from homeassistant.bootstrap import async_setup_component
-from homeassistant.components.rflink import (
+from homeassistant.components.rflink.const import (
     CONF_RECONNECT_INTERVAL,
     DATA_ENTITY_LOOKUP,
+    DATA_GATEWAY,
     EVENT_KEY_COMMAND,
     EVENT_KEY_SENSOR,
     SERVICE_SEND_COMMAND,
     TMP_ENTITY,
-    RflinkCommand,
 )
 from homeassistant.const import ATTR_ENTITY_ID, SERVICE_STOP_COVER, SERVICE_TURN_OFF
+from homeassistant.core import HomeAssistantError
 
 from tests.async_mock import Mock
 
@@ -50,7 +51,7 @@ async def mock_rflink(
 
     mock_create = Mock(wraps=create_rflink_connection)
     monkeypatch.setattr(
-        "homeassistant.components.rflink.create_rflink_connection", mock_create
+        "homeassistant.components.rflink.gateway.create_rflink_connection", mock_create
     )
 
     await async_setup_component(hass, "rflink", config)
@@ -336,10 +337,16 @@ async def test_race_condition(hass, monkeypatch):
 
 async def test_not_connected(hass, monkeypatch):
     """Test Error when sending commands to a disconnected device."""
-    import pytest
-    from homeassistant.core import HomeAssistantError
+    domain = "rflink"
+    config = {"rflink": {"port": "/dev/ttyABC0"}}
 
-    test_device = RflinkCommand("DUMMY_DEVICE")
-    RflinkCommand.set_rflink_protocol(None)
+    # setup mocking rflink module
+    _, _, _, _ = await mock_rflink(hass, config, domain, monkeypatch)
+
+    hass.data[DATA_GATEWAY].set_rflink_protocol(None, False)
+
     with pytest.raises(HomeAssistantError):
-        await test_device._async_handle_command("turn_on")
+        await hass.data[DATA_GATEWAY].send_command(
+            "newkaku_0000c6c2_1", SERVICE_TURN_OFF
+        )
+        # await test_device._async_handle_command("turn_on")

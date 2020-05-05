@@ -6,7 +6,7 @@ automatic sensor creation.
 """
 from datetime import timedelta
 
-from homeassistant.components.rflink import CONF_RECONNECT_INTERVAL
+from homeassistant.components.rflink.const import CONF_RECONNECT_INTERVAL
 from homeassistant.const import (
     EVENT_STATE_CHANGED,
     STATE_OFF,

@@ -12,7 +12,8 @@ from homeassistant.components.light import (
 from homeassistant.const import CONF_NAME, CONF_TYPE
 import homeassistant.helpers.config_validation as cv
 
-from . import (
+from . import SwitchableRflinkDevice
+from .const import (
     CONF_ALIASES,
     CONF_AUTOMATIC_ADD,
     CONF_DEVICE_DEFAULTS,
@@ -26,7 +27,6 @@ from . import (
     DEVICE_DEFAULTS_SCHEMA,
     EVENT_KEY_COMMAND,
     EVENT_KEY_ID,
-    SwitchableRflinkDevice,
 )
 
 _LOGGER = logging.getLogger(__name__)
