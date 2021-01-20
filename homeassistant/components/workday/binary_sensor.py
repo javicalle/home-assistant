@@ -122,7 +122,7 @@ async def async_setup_entry(
     )
 
 
-def day_to_string(day):
+def day_to_string(day: int) -> str:
     """Convert day index 0 - 7 to string."""
     try:
         return ALLOWED_DAYS[day]
@@ -149,16 +149,16 @@ class IsWorkdaySensor(BinarySensorEntity):
         self._unique_id = unique_id
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the sensor."""
         return self._name
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return the state of the device."""
         return self._state
 
-    def is_include(self, day, now):
+    def is_include(self, day, now) -> bool:
         """Check if given day is in the includes list."""
         if day in self._workdays:
             return True
@@ -167,7 +167,7 @@ class IsWorkdaySensor(BinarySensorEntity):
 
         return False
 
-    def is_exclude(self, day, now):
+    def is_exclude(self, day, now) -> bool:
         """Check if given day is in the excludes list."""
         if day in self._excludes:
             return True
@@ -186,7 +186,7 @@ class IsWorkdaySensor(BinarySensorEntity):
             CONF_OFFSET: self._days_offset,
         }
 
-    async def async_update(self):
+    async def async_update(self) -> None:
         """Get date and look whether it is a holiday."""
         # Default is no workday
         self._state = False
@@ -203,6 +203,6 @@ class IsWorkdaySensor(BinarySensorEntity):
             self._state = False
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         """Return a unique ID."""
         return self._unique_id
