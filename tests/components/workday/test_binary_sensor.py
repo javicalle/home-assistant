@@ -22,23 +22,29 @@ from tests.components.workday import (
 )
 
 FUNCTION_PATH = "homeassistant.components.workday.binary_sensor.get_date"
-WORKDAY_SENSOR = "binary_sensor.workday_sensor"
+# WORKDAY_SENSOR = "binary_sensor.workday_sensor"
 
 CONFIG_PROVINCE = create_workday_test_data(country="DE", province="BW")
+SENSOR_PROVINCE = "binary_sensor.workday_de_bw"
 CONFIG_NOPROVINCE = create_workday_test_data(country="DE")
+SENSOR_NOPROVINCE = "binary_sensor.workday_de"
 
 CONFIG_STATE = create_workday_test_data(country="US", state="CA")
+SENSOR_STATE = "binary_sensor.workday_us_ca"
 CONFIG_NOSTATE = create_workday_test_data(country="US")
+SENSOR_NOSTATE = "binary_sensor.workday_us"
 
 CONFIG_INCLUDEHOLIDAY = create_workday_test_data(
     country="DE", province="BW", workdays=["holiday"], excludes=["sat", "sun"]
 )
+SENSOR_INCLUDEHOLIDAY = "binary_sensor.workday_de_bw"
 
 CONFIG_REMOVE_HOLIDAYS_DATA = create_workday_test_data(
     country="US",
     workdays=["mon", "tue", "wed", "thu", "fri"],
     excludes=["sat", "sun", "holiday"],
 )
+SENSOR_REMOVE_HOLIDAYS_DATA = "binary_sensor.workday_us"
 CONFIG_REMOVE_HOLIDAYS_OPTIONS = create_workday_test_options(
     remove_holidays=["2020-12-25", "2020-11-26"]
 )
@@ -46,10 +52,12 @@ CONFIG_REMOVE_HOLIDAYS_OPTIONS = create_workday_test_options(
 CONFIG_TOMORROW = create_workday_test_data(country="DE", days_offset=1)
 CONFIG_DAY_AFTER_TOMORROW = create_workday_test_data(country="DE", days_offset=2)
 CONFIG_YESTERDAY = create_workday_test_data(country="DE", days_offset=-1)
+SENSOR_DE = "binary_sensor.workday_de"
 
 CONFIG_EXAMPLE1 = create_workday_test_data(
     country="US", workdays=["mon", "tue", "wed", "thu", "fri"], excludes=["sat", "sun"]
 )
+SENSOR_EXAMPLE1 = "binary_sensor.workday_us"
 CONFIG_EXAMPLE2_DATA = create_workday_test_data(
     country="DE",
     province="BW",
@@ -57,6 +65,7 @@ CONFIG_EXAMPLE2_DATA = create_workday_test_data(
     excludes=["sat", "sun", "holiday"],
 )
 CONFIG_EXAMPLE2_OPTIONS = create_workday_test_options(add_holidays=["2020-02-24"])
+SENSOR_EXAMPLE2 = "binary_sensor.workday_de_bw"
 
 
 async def test_setup_province(hass: HomeAssistant):
@@ -66,7 +75,7 @@ async def test_setup_province(hass: HomeAssistant):
     await hass.config_entries.async_setup(mock_entry.entry_id)
     await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_PROVINCE)
     assert entity is not None
 
 
@@ -79,7 +88,7 @@ async def test_workday_province(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_PROVINCE)
     assert entity.state == STATE_ON
 
 
@@ -92,7 +101,7 @@ async def test_weekend_province(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_PROVINCE)
     assert entity.state == STATE_OFF
 
 
@@ -105,7 +114,7 @@ async def test_public_holiday_province(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_PROVINCE)
     assert entity.state == STATE_OFF
 
 
@@ -118,7 +127,7 @@ async def test_setup_component_noprovince(hass: HomeAssistant):
     await hass.config_entries.async_setup(mock_entry.entry_id)
     await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_NOPROVINCE)
     assert entity is not None
 
 
@@ -133,7 +142,7 @@ async def test_public_holiday_noprovince(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_NOPROVINCE)
     assert entity.state == STATE_ON
 
 
@@ -146,7 +155,7 @@ async def test_public_holiday_state(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_STATE)
     assert entity.state == STATE_OFF
 
 
@@ -159,7 +168,7 @@ async def test_public_holiday_nostate(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_NOSTATE)
     assert entity.state == STATE_ON
 
 
@@ -174,7 +183,7 @@ async def test_public_holiday_includeholiday(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_INCLUDEHOLIDAY)
     assert entity.state == STATE_ON
 
 
@@ -187,7 +196,7 @@ async def test_tomorrow(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_DE)
     assert entity.state == STATE_OFF
 
 
@@ -202,7 +211,7 @@ async def test_day_after_tomorrow(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_DE)
     assert entity.state == STATE_ON
 
 
@@ -215,7 +224,7 @@ async def test_yesterday(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_DE)
     assert entity.state == STATE_ON
 
 
@@ -229,7 +238,7 @@ async def test_config_example1_holiday(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_EXAMPLE1)
     assert entity.state == STATE_ON
 
 
@@ -247,7 +256,7 @@ async def test_config_example2_tue(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_EXAMPLE2)
     assert entity.state == STATE_OFF
 
 
@@ -265,7 +274,7 @@ async def test_config_example2_add_holiday(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_EXAMPLE2)
     assert entity.state == STATE_OFF
 
 
@@ -283,7 +292,7 @@ async def test_config_remove_holidays_xmas(hass: HomeAssistant):
         await hass.config_entries.async_setup(mock_entry.entry_id)
         await hass.async_block_till_done()
 
-    entity = hass.states.get(WORKDAY_SENSOR)
+    entity = hass.states.get(SENSOR_REMOVE_HOLIDAYS_DATA)
     assert entity.state == STATE_ON
 
 
