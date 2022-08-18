@@ -419,10 +419,8 @@ class InovelliRelayClickInOnOffMode(
     _zcl_attribute: str = "relay_click_in_on_off_mode"
     _attr_name: str = "Disable relay click in on off mode"
 
-        
-@CONFIG_DIAGNOSTIC_MATCH(
-    channel_names="window_covering"
-)
+
+@CONFIG_DIAGNOSTIC_MATCH(channel_names="window_covering")
 class InvertedCover(ZHASwitchConfigurationEntity, id_suffix="window_covering_mode"):
     """ZHA inverted cover switch."""
 
