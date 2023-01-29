@@ -3,7 +3,9 @@ import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from zigpy.const import SIG_ENDPOINTS
 import zigpy.profiles.zha
+from zigpy.quirks import CustomCluster, CustomDevice
 import zigpy.types
 import zigpy.zcl.clusters.closures as closures
 import zigpy.zcl.clusters.general as general
@@ -443,3 +445,62 @@ async def test_cover_remote(hass, zha_device_joined_restored, zigpy_cover_remote
 
     assert len(zha_events) == 2
     assert zha_events[1].data[ATTR_COMMAND] == "down_close"
+
+
+class TuyaCoverQuirk(CustomDevice):
+    """Quirk with 'tuya_window_covering' cluster."""
+
+    class TuyaCoveringCluster(CustomCluster, closures.WindowCovering):
+        """Tuya WindowCovering cluster."""
+
+        ep_attribute = "tuya_window_covering"
+
+        attributes = closures.WindowCovering.attributes.copy()
+        attributes.update({0xF000: ("tuya_moving_state", zigpy.types.enum8, True)})
+        attributes.update({0xF001: ("calibration", zigpy.types.enum8, True)})
+        attributes.update({0xF002: ("motor_reversal", zigpy.types.enum8, True)})
+        attributes.update({0xF003: ("calibration_time", zigpy.types.uint16_t, True)})
+
+    replacement = {
+        SIG_ENDPOINTS: {
+            1: {
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_DEVICE,
+                SIG_EP_INPUT: [TuyaCoveringCluster],
+                SIG_EP_OUTPUT: [],
+            },
+        }
+    }
+
+
+@pytest.fixture
+async def tuya_window_cover(hass, zigpy_device_mock, zha_device_joined):
+    """Tuya VindowCovering fixture."""
+
+    zigpy_device = zigpy_device_mock(
+        {
+            1: {
+                SIG_EP_INPUT: [closures.WindowCovering.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_DEVICE,
+            }
+        },
+        model="TS130F",
+        manufacturer="_TZE200_whatever",
+        quirk=TuyaCoverQuirk,
+    )
+
+    zha_device = await zha_device_joined(zigpy_device)
+    zha_device.available = True
+    cover_cluster = zigpy_device.endpoints[1].tuya_window_covering
+    return zha_device, cover_cluster
+
+
+async def test_tuya_window_covering(hass, tuya_window_cover):
+    """Test Tuya custom 'motor direction' ZHA select."""
+
+    zha_device, cluster = tuya_window_cover
+    assert cluster is not None
+    assert cluster.ep_attribute=="tuya_window_covering"
+    cover_entity_id = await find_entity_id(Platform.COVER, zha_device, hass)
+    assert cover_entity_id is not None
